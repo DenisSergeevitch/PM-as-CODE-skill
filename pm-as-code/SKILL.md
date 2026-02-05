@@ -13,6 +13,7 @@ For long-running projects, prefer compact ledger mode:
 - store full machine-readable history in `.pm/*` files
 - render `status.md` as a compact snapshot from ledger state
 - keep full pulse history append-only in `.pm/pulse.log`
+- for multi-agent/no-Git setups, serialize writes with `scripts/pm-collab.sh`
 
 ## Run Session Protocol
 
@@ -105,9 +106,32 @@ Compact mode rules:
 - Treat rendered `status.md` as canonical human snapshot.
 - Re-render after each meaningful task update.
 
+## Use Multi-Agent Mode (No Git Required)
+
+When multiple agents share one working directory, do not edit `status.md` directly.
+Use lock + claim workflow via `scripts/pm-collab.sh`.
+
+1. Initialize once:
+   - `scripts/pm-collab.sh init`
+2. Claim before changing a task:
+   - `scripts/pm-collab.sh claim agent-a T-0003 "working on auth"`
+3. Run all write commands through the lock wrapper:
+   - `scripts/pm-collab.sh run agent-a -- move T-0003 in-progress`
+   - `scripts/pm-collab.sh run agent-a -- criterion-check T-0003 1`
+   - `scripts/pm-collab.sh run agent-a -- done T-0003 "src/auth.ts" "tests passed"`
+4. Release if unfinished:
+   - `scripts/pm-collab.sh unclaim agent-a T-0003`
+
+Rules:
+- One task can be claimed by only one agent at a time.
+- `run` rejects task mutations when the task is unclaimed or claimed by another agent.
+- Writes are serialized with a lock to avoid race conditions in `.pm/*` and `status.md`.
+- `done` auto-releases the claim.
+
 ## Reference Files
 
 - `references/pm-rules.md`: Full strict policy and session protocol.
 - `references/status-template.md`: Required root `status.md` template.
 - `references/optional-doc-templates.md`: Optional `backlog.md`, ADR, and `risks.md` templates.
 - `references/compact-ticket-system.md`: No-dependency Bash ticket ledger and command reference.
+- `scripts/pm-collab.sh`: Locking and claim wrapper for multi-agent/no-Git collaboration.

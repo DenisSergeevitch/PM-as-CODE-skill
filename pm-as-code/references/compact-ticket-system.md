@@ -25,6 +25,20 @@ scripts/pm-ticket.sh done T-0001 "src/auth/callback.ts" "manual test passed"
 scripts/pm-ticket.sh render status.md
 ```
 
+## Multi-Agent Commands (No Git)
+
+Use these when two or more agents share the same filesystem workspace.
+
+```bash
+scripts/pm-collab.sh init
+scripts/pm-collab.sh claim agent-a T-0001 "API work"
+scripts/pm-collab.sh run agent-a -- move T-0001 in-progress
+scripts/pm-collab.sh run agent-a -- criterion-check T-0001 1
+scripts/pm-collab.sh run agent-a -- done T-0001 "src/api/auth.ts" "tests passed"
+scripts/pm-collab.sh claims
+scripts/pm-collab.sh unclaim agent-a T-0001
+```
+
 ## States
 
 - `now`
@@ -42,8 +56,22 @@ scripts/pm-ticket.sh render status.md
 5. Record evidence and close with `done`.
 6. Re-render `status.md` after task changes.
 
+## Recommended Workflow (Multi-Agent, No Git)
+
+1. Initialize with `scripts/pm-collab.sh init`.
+2. Each agent claims one task before modifying it.
+3. Each agent performs write operations through `scripts/pm-collab.sh run <agent> -- ...`.
+4. Keep tasks exclusive by claim owner to avoid duplicate work.
+5. Complete with `done` (claim is auto-released) or manually `unclaim`.
+
 ## Why This Saves Context
 
 - `status.md` stays small and scannable.
 - Full history stays in `.pm/pulse.log`.
 - Structured TSV files avoid verbose prose growth.
+
+## Why Multi-Agent Mode Works
+
+- Serializes write operations with a lock (`.pm/.collab-lock`).
+- Prevents conflicting edits by enforcing per-task claims.
+- Keeps coordination data in `.pm/claims.tsv` and Pulse Log.

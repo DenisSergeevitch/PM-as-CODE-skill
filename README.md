@@ -10,6 +10,7 @@ Project-management workflow for coding agents with:
 - ticket IDs like `T-0001`
 - acceptance criteria tracking
 - append-only pulse log updates
+- multi-agent no-Git mode via `scripts/pm-collab.sh` (lock + task claims)
 
 Main file: `pm-as-code/SKILL.md`
 
