@@ -1,6 +1,6 @@
 ---
 name: pm-as-code
-description: Strict Markdown project management with status.md as canonical truth, checkbox-only work items, task IDs, acceptance criteria, evidence tracking, and append-only pulse history. Includes a no-dependency Bash ticket ledger for long-running repos to keep status.md compact. Use when maintaining repo order, managing execution state across sessions, or replacing chat-memory planning with durable project docs.
+description: Strict Markdown project management with status.md as canonical truth, checkbox-only work items, task IDs, acceptance criteria, evidence tracking, and append-only pulse history. Includes no-dependency Bash and Windows (PowerShell/CMD) ticket ledgers for long-running repos to keep status.md compact. Use when maintaining repo order, managing execution state across sessions, or replacing chat-memory planning with durable project docs.
 ---
 
 # PM as Code
@@ -13,7 +13,7 @@ For long-running projects, prefer compact ledger mode:
 - store full machine-readable history in `.pm/*` files
 - render `status.md` as a compact snapshot from ledger state
 - keep full pulse history append-only in `.pm/pulse.log`
-- for multi-agent/no-Git setups, serialize writes with `scripts/pm-collab.sh`
+- for multi-agent/no-Git setups, serialize writes with `scripts/pm-collab.sh` or `scripts/pm-collab.ps1`
 
 ## Run Session Protocol
 
@@ -120,7 +120,10 @@ Compact mode rules:
 ## Use Multi-Agent Mode (No Git Required)
 
 When multiple agents share one working directory, do not edit `status.md` directly.
-Use lock + claim workflow via `scripts/pm-collab.sh`.
+Use lock + claim workflow via platform-native collab wrappers:
+- Bash: `scripts/pm-collab.sh`
+- PowerShell: `scripts/pm-collab.ps1`
+- CMD wrapper: `scripts/pm-collab.cmd`
 
 1. Initialize once:
    - `scripts/pm-collab.sh init`
@@ -133,6 +136,14 @@ Use lock + claim workflow via `scripts/pm-collab.sh`.
 4. Release if unfinished:
    - `scripts/pm-collab.sh unclaim agent-a T-0003`
 
+Windows flow:
+1. `scripts\pm-collab.cmd init`
+2. `scripts\pm-collab.cmd claim agent-a T-0003 "working on auth"`
+3. `scripts\pm-collab.cmd run agent-a -- move T-0003 in-progress`
+4. `scripts\pm-collab.cmd run agent-a -- criterion-check T-0003 1`
+5. `scripts\pm-collab.cmd run agent-a -- done T-0003 "src\auth.ts" "tests passed"`
+6. `scripts\pm-collab.cmd unclaim agent-a T-0003`
+
 Rules:
 - One task can be claimed by only one agent at a time.
 - `run` rejects task mutations when the task is unclaimed or claimed by another agent.
@@ -144,5 +155,7 @@ Rules:
 - `references/pm-rules.md`: Full strict policy and session protocol.
 - `references/status-template.md`: Required root `status.md` template.
 - `references/optional-doc-templates.md`: Optional `backlog.md`, ADR, and `risks.md` templates.
-- `references/compact-ticket-system.md`: No-dependency Bash ticket ledger and command reference.
-- `scripts/pm-collab.sh`: Locking and claim wrapper for multi-agent/no-Git collaboration.
+- `references/compact-ticket-system.md`: No-dependency cross-platform ticket and collab command reference.
+- `scripts/pm-collab.sh`: Bash locking and claim wrapper for multi-agent/no-Git collaboration.
+- `scripts/pm-collab.ps1`: PowerShell locking and claim wrapper for multi-agent/no-Git collaboration.
+- `scripts/pm-collab.cmd`: CMD wrapper for PowerShell collab workflow.

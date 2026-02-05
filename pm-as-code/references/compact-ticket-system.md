@@ -57,6 +57,8 @@ scripts\pm-ticket.cmd render status.md
 
 Use these when two or more agents share the same filesystem workspace.
 
+macOS/Linux (Bash):
+
 ```bash
 scripts/pm-collab.sh init
 scripts/pm-collab.sh claim agent-a T-0001 "API work"
@@ -65,6 +67,30 @@ scripts/pm-collab.sh run agent-a -- criterion-check T-0001 1
 scripts/pm-collab.sh run agent-a -- done T-0001 "src/api/auth.ts" "tests passed"
 scripts/pm-collab.sh claims
 scripts/pm-collab.sh unclaim agent-a T-0001
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 init
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 claim agent-a T-0001 "API work"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 run agent-a -- move T-0001 in-progress
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 run agent-a -- criterion-check T-0001 1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 run agent-a -- done T-0001 "src\api\auth.ts" "tests passed"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 claims
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-collab.ps1 unclaim agent-a T-0001
+```
+
+Windows (CMD wrapper):
+
+```cmd
+scripts\pm-collab.cmd init
+scripts\pm-collab.cmd claim agent-a T-0001 "API work"
+scripts\pm-collab.cmd run agent-a -- move T-0001 in-progress
+scripts\pm-collab.cmd run agent-a -- criterion-check T-0001 1
+scripts\pm-collab.cmd run agent-a -- done T-0001 "src\api\auth.ts" "tests passed"
+scripts\pm-collab.cmd claims
+scripts\pm-collab.cmd unclaim agent-a T-0001
 ```
 
 ## States
@@ -86,9 +112,9 @@ scripts/pm-collab.sh unclaim agent-a T-0001
 
 ## Recommended Workflow (Multi-Agent, No Git)
 
-1. Initialize with `scripts/pm-collab.sh init`.
+1. Initialize with `scripts/pm-collab.sh init` or `scripts\pm-collab.cmd init`.
 2. Each agent claims one task before modifying it.
-3. Each agent performs write operations through `scripts/pm-collab.sh run <agent> -- ...`.
+3. Each agent performs write operations through `scripts/pm-collab.sh run <agent> -- ...` or `scripts\pm-collab.cmd run <agent> -- ...`.
 4. Keep tasks exclusive by claim owner to avoid duplicate work.
 5. Complete with `done` (claim is auto-released) or manually `unclaim`.
 

@@ -133,3 +133,4 @@ Rules:
 - Render `status.md` from ledger state after task changes.
 - Keep `status.md` concise by showing recent pulse entries while linking `.pm/pulse.log` as full history.
 - Use `scripts/pm-ticket.sh` (Bash) or `scripts/pm-ticket.ps1` / `scripts/pm-ticket.cmd` (Windows) for all ledger operations to keep format stable.
+- For multi-agent locking, use `scripts/pm-collab.sh` (Bash) or `scripts/pm-collab.ps1` / `scripts/pm-collab.cmd` (Windows).
