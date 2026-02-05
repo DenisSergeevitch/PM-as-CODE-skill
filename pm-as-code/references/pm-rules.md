@@ -132,4 +132,4 @@ Rules:
 - Keep `.pm/pulse.log` append-only and never rewrite historical entries.
 - Render `status.md` from ledger state after task changes.
 - Keep `status.md` concise by showing recent pulse entries while linking `.pm/pulse.log` as full history.
-- Use `scripts/pm-ticket.sh` for all ledger operations to keep format stable.
+- Use `scripts/pm-ticket.sh` (Bash) or `scripts/pm-ticket.ps1` / `scripts/pm-ticket.cmd` (Windows) for all ledger operations to keep format stable.

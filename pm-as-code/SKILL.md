@@ -90,7 +90,10 @@ Use `references/optional-doc-templates.md` for file templates.
 
 ## Use Compact Ledger Mode (No Dependencies)
 
-Use `/scripts/pm-ticket.sh` when `status.md` growth starts harming context.
+Use platform-native ticket scripts when `status.md` growth starts harming context:
+- Bash: `scripts/pm-ticket.sh`
+- PowerShell: `scripts/pm-ticket.ps1`
+- CMD wrapper: `scripts/pm-ticket.cmd`
 
 Typical flow:
 1. `scripts/pm-ticket.sh init`
@@ -99,6 +102,14 @@ Typical flow:
 4. `scripts/pm-ticket.sh move T-0001 in-progress`
 5. `scripts/pm-ticket.sh done T-0001 "docs/auth.md" "Reviewed with team"`
 6. `scripts/pm-ticket.sh render status.md`
+
+Windows flow:
+1. `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 init`
+2. `scripts\pm-ticket.cmd new next "Define authentication boundaries"`
+3. `scripts\pm-ticket.cmd criterion-add T-0001 "Document API auth requirements"`
+4. `scripts\pm-ticket.cmd move T-0001 in-progress`
+5. `scripts\pm-ticket.cmd done T-0001 "docs\auth.md" "Reviewed with team"`
+6. `scripts\pm-ticket.cmd render status.md`
 
 Compact mode rules:
 - Treat `.pm/pulse.log` as full append-only history.

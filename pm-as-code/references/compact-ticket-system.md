@@ -1,4 +1,4 @@
-# Compact Ticket System (Bash, No Dependencies)
+# Compact Ticket System (No Dependencies)
 
 Use this when `status.md` gets large and wastes context space.
 
@@ -14,6 +14,8 @@ Use this when `status.md` gets large and wastes context space.
 
 ## Commands
 
+macOS/Linux (Bash):
+
 ```bash
 scripts/pm-ticket.sh init
 scripts/pm-ticket.sh new next "Implement OAuth callback flow"
@@ -23,6 +25,32 @@ scripts/pm-ticket.sh criterion-check T-0001 1
 scripts/pm-ticket.sh evidence T-0001 "src/auth/callback.ts" "state validation added"
 scripts/pm-ticket.sh done T-0001 "src/auth/callback.ts" "manual test passed"
 scripts/pm-ticket.sh render status.md
+```
+
+Windows (PowerShell):
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 init
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 new next "Implement OAuth callback flow"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 criterion-add T-0001 "Callback route validates state"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 move T-0001 in-progress
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 criterion-check T-0001 1
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 evidence T-0001 "src\auth\callback.ts" "state validation added"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 done T-0001 "src\auth\callback.ts" "manual test passed"
+powershell -NoProfile -ExecutionPolicy Bypass -File scripts\pm-ticket.ps1 render status.md
+```
+
+Windows (CMD wrapper):
+
+```cmd
+scripts\pm-ticket.cmd init
+scripts\pm-ticket.cmd new next "Implement OAuth callback flow"
+scripts\pm-ticket.cmd criterion-add T-0001 "Callback route validates state"
+scripts\pm-ticket.cmd move T-0001 in-progress
+scripts\pm-ticket.cmd criterion-check T-0001 1
+scripts\pm-ticket.cmd evidence T-0001 "src\auth\callback.ts" "state validation added"
+scripts\pm-ticket.cmd done T-0001 "src\auth\callback.ts" "manual test passed"
+scripts\pm-ticket.cmd render status.md
 ```
 
 ## Multi-Agent Commands (No Git)
