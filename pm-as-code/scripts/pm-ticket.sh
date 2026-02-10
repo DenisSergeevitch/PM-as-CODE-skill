@@ -18,6 +18,7 @@ PULSE_TAIL=30
 NEXT_LIMIT=20
 EVIDENCE_TAIL=50
 CONTEXT_EVIDENCE_TAIL=10
+BLOAT_TICKET_THRESHOLD=50
 
 PARSED_ARGS=()
 
@@ -121,6 +122,14 @@ scoped_rel_path() {
   printf '.pm/scopes/%s/%s' "$SCOPE" "$file"
 }
 
+recommended_pm_ticket_command() {
+  if [[ "${OSTYPE:-}" == msys* || "${OSTYPE:-}" == cygwin* || "${OSTYPE:-}" == win32* ]]; then
+    printf 'scripts\\pm-ticket.cmd --scope %s <command>' "$SCOPE"
+  else
+    printf 'scripts/pm-ticket.sh --scope %s <command>' "$SCOPE"
+  fi
+}
+
 migrate_legacy_default_scope() {
   if [[ "$SCOPE" != "default" ]]; then
     return
@@ -215,12 +224,14 @@ load_meta() {
   NEXT_LIMIT="${NEXT_LIMIT:-20}"
   EVIDENCE_TAIL="${EVIDENCE_TAIL:-50}"
   CONTEXT_EVIDENCE_TAIL="${CONTEXT_EVIDENCE_TAIL:-10}"
+  BLOAT_TICKET_THRESHOLD="${BLOAT_TICKET_THRESHOLD:-50}"
 
   [[ "$NEXT_TASK_NUM" =~ ^[0-9]+$ ]] || NEXT_TASK_NUM=1
   [[ "$PULSE_TAIL" =~ ^[0-9]+$ ]] || PULSE_TAIL=30
   [[ "$NEXT_LIMIT" =~ ^[0-9]+$ ]] || NEXT_LIMIT=20
   [[ "$EVIDENCE_TAIL" =~ ^[0-9]+$ ]] || EVIDENCE_TAIL=50
   [[ "$CONTEXT_EVIDENCE_TAIL" =~ ^[0-9]+$ ]] || CONTEXT_EVIDENCE_TAIL=10
+  [[ "$BLOAT_TICKET_THRESHOLD" =~ ^[0-9]+$ ]] || BLOAT_TICKET_THRESHOLD=50
 }
 
 save_meta() {
@@ -230,6 +241,7 @@ PULSE_TAIL=$PULSE_TAIL
 NEXT_LIMIT=$NEXT_LIMIT
 EVIDENCE_TAIL=$EVIDENCE_TAIL
 CONTEXT_EVIDENCE_TAIL=$CONTEXT_EVIDENCE_TAIL
+BLOAT_TICKET_THRESHOLD=$BLOAT_TICKET_THRESHOLD
 EOF_META
 }
 
@@ -326,6 +338,7 @@ cmd_init() {
     NEXT_LIMIT=20
     EVIDENCE_TAIL=50
     CONTEXT_EVIDENCE_TAIL=10
+    BLOAT_TICKET_THRESHOLD=50
     save_meta
   fi
   if [[ ! -f "$CORE_FILE" ]]; then
@@ -730,7 +743,7 @@ cmd_render() {
 
   local explicit=0
   local out=""
-  local next_task_id tickets_hint evidence_hint pulse_hint
+  local next_task_id tickets_hint evidence_hint pulse_hint total_tickets
 
   if [[ $# -gt 0 && -n "${1:-}" ]]; then
     explicit=1
@@ -743,6 +756,7 @@ cmd_render() {
   tickets_hint="$(scoped_rel_path "tickets.tsv")"
   evidence_hint="$(scoped_rel_path "evidence.tsv")"
   pulse_hint="$(scoped_rel_path "pulse.log")"
+  total_tickets="$(awk 'NR > 1 { c++ } END { print c + 0 }' "$TICKETS_FILE")"
 
   {
     echo "# status.md"
@@ -751,6 +765,12 @@ cmd_render() {
     echo "Scope: $SCOPE"
     echo "Last updated: $(now_date)"
     echo "> Generated from $(scoped_rel_path "tickets.tsv"), $(scoped_rel_path "criteria.tsv"), $(scoped_rel_path "evidence.tsv"), and $(scoped_rel_path "pulse.log"); do not hand-edit."
+    echo "> Write policy: never edit status.md manually; use $(recommended_pm_ticket_command)"
+    echo "> Bloat metric: $total_tickets tickets (threshold: $BLOAT_TICKET_THRESHOLD)"
+    if ((BLOAT_TICKET_THRESHOLD > 0 && total_tickets >= BLOAT_TICKET_THRESHOLD)); then
+      echo "> Threshold reached: use pm-ticket CLI for updates."
+      echo "> Recommended command: $(recommended_pm_ticket_command)"
+    fi
     echo
     echo "---"
     echo

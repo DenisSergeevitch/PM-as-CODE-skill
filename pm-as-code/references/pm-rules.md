@@ -21,9 +21,11 @@
 - Keep no hidden tasks in prose. If it is actionable, represent it as a checkbox.
 - Give every task an ID and reference tasks by ID everywhere.
 - Keep `status.md` in repo root.
-- Keep `status.md` alive by updating it every task completion.
+- Treat `status.md` as a rendered snapshot; do not hand-edit it.
+- Keep `status.md` alive by re-rendering it after task completion.
 - Keep Pulse Log append-only. Never delete or rewrite prior entries.
 - Resolve uncertainty by recording updates in docs, not by chat memory.
+- Route all state writes through `scripts/pm-ticket.*` (single-agent) or `scripts/pm-collab.*` (multi-agent).
 
 ## Canon and Scope
 
@@ -50,9 +52,9 @@ Keep counters in `status.md`:
 - Optional: `Next Risk ID: RISK-xx`
 
 Issue IDs strictly:
-1. Read next ID from counter.
-2. Increment counter immediately.
-3. Add task checkbox in `status.md`.
+1. Use `scripts/pm-ticket.* next-id` or `new` to allocate from counter.
+2. Persist counter updates via script command.
+3. Render `status.md` from ledger after changes.
 
 ## Task Standard
 
@@ -100,19 +102,21 @@ No exceptions.
 Start of session:
 1. Read `status.md` first.
 2. Confirm objective clarity, `Now` accuracy, and at least one active task ID.
-3. If missing, create new task, add acceptance criteria, and place in `Now` or `Next`.
+3. Ensure scope is initialized via `scripts/pm-ticket.* init`.
+4. If missing, create new task, add acceptance criteria, and place in `Now` or `Next` via script command.
 
 While working:
 - Keep changes factual and structured.
-- Add new task IDs immediately for discovered work.
-- Move blocked tasks to `Blocked` and record explicit blocker reason.
+- Add new task IDs immediately for discovered work via script command.
+- Move blocked tasks to `Blocked` and record explicit blocker reason via script command.
 
 Finish task:
-1. Mark task `[x]`.
-2. Mark acceptance criteria `[x]`.
-3. Add evidence.
-4. Update state lists.
-5. Append Pulse Log entry.
+1. Mark task `[x]` via script command.
+2. Mark acceptance criteria `[x]` via script command.
+3. Add evidence via script command.
+4. Update state lists via script command.
+5. Append Pulse Log entry via script command.
+6. Render `status.md` via script.
 
 ## Append-Only Rule
 
@@ -122,7 +126,7 @@ Finish task:
 
 ## Compact Ledger Mode
 
-Use compact mode for long-running projects when `status.md` becomes too large.
+Use compact ledger mode as the default workflow.
 
 Rules:
 - Keep source-of-truth state in `.pm/scopes/<scope>/`:
@@ -141,15 +145,14 @@ Rules:
 - Use scope selection (`--scope` or `PM_SCOPE`) to isolate teams/swarm lanes.
 - Use `scripts/pm-ticket.sh` (Bash) or `scripts/pm-ticket.ps1` / `scripts/pm-ticket.cmd` (Windows) for all ledger operations to keep format stable.
 - For multi-agent locking, use `scripts/pm-collab.sh` (Bash) or `scripts/pm-collab.ps1` / `scripts/pm-collab.cmd` (Windows).
-- Generated snapshots should not be hand-edited; use ticket/collab scripts and re-render.
+- Generated snapshots must not be hand-edited; use ticket/collab scripts and re-render.
 
 ## Concurrency Policy
 
 For concurrent updates, default to no-confirm auto-merge behavior:
-- Re-read latest `status.md` immediately before write.
-- Apply minimal ID-targeted changes for owned task only.
-- Preserve unrelated edits untouched.
-- Do not interrupt flow for non-conflicting changes.
+- Never write directly to `status.md`.
+- Execute mutations through `pm-collab ... run` so lock + claim serialize writes.
+- Re-render after updates and continue without confirmation prompts for non-conflicting work.
 
 Escalate only for same-task ambiguity:
 - target ID missing

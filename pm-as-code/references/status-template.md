@@ -5,7 +5,8 @@
 - [status.md Template (Required)](#statusmd-template-required)
 - [Completion rule](#completion-rule)
 
-Create `/status.md` in repo root with this structure:
+Use this as the required rendered structure for `/status.md` in repo root.
+`status.md` should be produced by `scripts/pm-ticket.* render`, not hand-edited.
 
 ```md
 # status.md
@@ -106,6 +107,6 @@ Notes:
 ```
 
 Completion rule:
-- update `Last updated` every time a task is finished
 - keep section order unchanged
 - append Pulse entries only
+- run `scripts/pm-ticket.* render` after task updates

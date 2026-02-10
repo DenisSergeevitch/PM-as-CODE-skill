@@ -1,6 +1,7 @@
 # Compact Ticket System (No Dependencies)
 
-Use this when `status.md` gets large and wastes context space.
+Use this as the default write path for all project updates.
+Read `status.md`, but never edit it manually.
 
 ## What It Stores
 
@@ -13,7 +14,8 @@ Use this when `status.md` gets large and wastes context space.
 - `.pm/scopes/<scope>/claims.tsv` (optional): claim ownership in multi-agent mode.
 - `status.md` plus `status.<scope>.md`: rendered snapshots/index.
 
-`status.md` remains the human entrypoint. In ledger mode, `.pm/scopes/<scope>/*` is the machine system of record.
+`status.md` remains the human entrypoint. `.pm/scopes/<scope>/*` is the machine system of record.
+All mutations must go through `scripts/pm-ticket.*` or `scripts/pm-collab.*`, then render snapshots.
 
 ## Scope / Team Namespace
 
@@ -38,6 +40,7 @@ Configure these keys in `.pm/scopes/<scope>/meta.env`:
 - `NEXT_LIMIT` (default `20`): max `Next` items shown in `status.md`
 - `EVIDENCE_TAIL` (default `50`): max recent evidence lines shown
 - `PULSE_TAIL` (default `30`): max recent pulse lines shown
+- `BLOAT_TICKET_THRESHOLD` (default `50`): when total tickets reach this count, rendered header adds a CLI warning and recommended OS command
 
 Set a value to `0` to disable that limit.
 

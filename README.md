@@ -25,9 +25,10 @@ Core behavior:
 - Completion requires evidence and an append-only Pulse entry.
 
 Execution modes:
-- Direct Markdown mode: update `status.md` manually for short projects.
-- Ledger mode: use `scripts/pm-ticket.sh` (Bash) or `scripts/pm-ticket.ps1` (PowerShell) to store machine records in `.pm/*` and render status files.
-- Multi-agent mode (no Git needed): use `scripts/pm-collab.sh` or `scripts/pm-collab.ps1` for lock + per-task claim workflow in shared folders.
+- Single-agent mode: use `scripts/pm-ticket.sh` (Bash) or `scripts/pm-ticket.ps1` / `scripts/pm-ticket.cmd` (Windows) for all state changes.
+- Multi-agent mode (no Git needed): use `scripts/pm-collab.sh` or `scripts/pm-collab.ps1` / `scripts/pm-collab.cmd` for lock + per-task claim workflow in shared folders.
+- `status.md` is generated output; do not edit it manually.
+- Rendered status headers include a bloat metric (`BLOAT_TICKET_THRESHOLD`, default `50`) and print an OS-appropriate `pm-ticket` command once the threshold is reached.
 
 Typical flow:
 1. Read `status.md`.

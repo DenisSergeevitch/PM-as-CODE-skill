@@ -8,12 +8,16 @@ description: "Strict Markdown project management with status.md as the canonical
 ## Contract
 
 - Read `status.md` first in every session.
+- Treat `status.md` as a generated snapshot; never edit it manually.
 - Keep all actionables as checkboxes only: `- [ ]` or `- [x]`.
 - Give every task an ID (`T-0001`, `T-0002`, ...), and keep counters in `status.md`.
 - Keep required section order exactly as defined in `references/status-template.md`.
 - Keep acceptance criteria for active tasks keyed by task ID.
 - Treat Pulse history as append-only.
 - Resolve ambiguity by updating docs, never by relying on chat memory.
+- Route every state mutation through scripts:
+  - single-agent: `scripts/pm-ticket.sh` or `scripts/pm-ticket.ps1` / `scripts/pm-ticket.cmd`
+  - multi-agent: `scripts/pm-collab.sh` or `scripts/pm-collab.ps1` / `scripts/pm-collab.cmd`
 
 ## Done Gate
 
@@ -27,20 +31,20 @@ A task is done only when all are true:
 ## Session Loop
 
 1. Read `status.md`.
-2. Execute one active task ID (prefer `Now`).
-3. If new work appears, create a new task ID immediately.
-4. If blocked, move task to `Blocked` with explicit blocker text.
-5. On completion, run the Done Gate.
+2. Ensure scope is initialized (`pm-ticket ... init`) and select scope (`--scope` or `PM_SCOPE`).
+3. Execute one active task ID (prefer `Now`) using ticket/collab commands only.
+4. If new work appears, create a new task ID immediately via script command.
+5. If blocked, move task to `Blocked` with explicit blocker text via script command.
+6. On completion, run the Done Gate and render via script.
 
 ## Mode Selection
 
-Use direct Markdown mode for short projects.
-
-Use ledger mode when `status.md` grows:
+Use ledger mode by default:
 - `scripts/pm-ticket.sh` (Bash)
 - `scripts/pm-ticket.ps1` or `scripts/pm-ticket.cmd` (Windows)
 - Prefer scoped ledgers for parallel teams: `--scope <name>` (or `PM_SCOPE`).
 - Ledger files in `.pm/scopes/<scope>/*` are the machine record.
+- Manual edits to `status.md` are forbidden; script render is authoritative.
 - `status.md` is rendered:
   - single default scope: full snapshot
   - multiple scopes (or non-default only): compact scope index to `status.<scope>.md`
@@ -55,14 +59,9 @@ Use multi-agent mode for shared workspaces:
 Concurrent edits are expected in multi-agent work.
 
 Default behavior:
-- Do not ask for confirmation on non-conflicting concurrent edits.
-- Re-read latest `status.md` before writing.
-- Apply minimal ID-targeted updates for owned task only:
-  - mark task checkbox done
-  - mark acceptance criteria done
-  - add evidence for that task
-  - append one pulse entry for that task
-- Keep unrelated tasks/sections untouched.
+- Do not hand-edit `status.md` during concurrent work.
+- Perform writes through `pm-collab ... run` for lock + claim enforcement.
+- Re-render snapshot after task updates.
 
 Escalate only on true same-task conflicts:
 - target task ID missing

@@ -19,6 +19,7 @@ $script:PulseTail = 30
 $script:NextLimit = 20
 $script:EvidenceTail = 50
 $script:ContextEvidenceTail = 10
+$script:BloatTicketThreshold = 50
 
 function Write-Usage {
     @'
@@ -121,6 +122,10 @@ function Set-ScopePaths {
 
 function Scoped-RelPath([string]$FileName) {
     return ".pm/scopes/$script:Scope/$FileName"
+}
+
+function Get-RecommendedPmTicketCommand {
+    return "scripts\pm-ticket.cmd --scope $script:Scope <command>"
 }
 
 function Migrate-LegacyDefaultScope {
@@ -256,12 +261,14 @@ function Load-Meta {
     $script:NextLimit = Parse-IntOrDefault $meta "NEXT_LIMIT" 20
     $script:EvidenceTail = Parse-IntOrDefault $meta "EVIDENCE_TAIL" 50
     $script:ContextEvidenceTail = Parse-IntOrDefault $meta "CONTEXT_EVIDENCE_TAIL" 10
+    $script:BloatTicketThreshold = Parse-IntOrDefault $meta "BLOAT_TICKET_THRESHOLD" 50
 
     if ($script:NextTaskNum -lt 1) { $script:NextTaskNum = 1 }
     if ($script:PulseTail -lt 0) { $script:PulseTail = 30 }
     if ($script:NextLimit -lt 0) { $script:NextLimit = 20 }
     if ($script:EvidenceTail -lt 0) { $script:EvidenceTail = 50 }
     if ($script:ContextEvidenceTail -lt 0) { $script:ContextEvidenceTail = 10 }
+    if ($script:BloatTicketThreshold -lt 0) { $script:BloatTicketThreshold = 50 }
 }
 
 function Save-Meta {
@@ -271,6 +278,7 @@ function Save-Meta {
         "NEXT_LIMIT=$script:NextLimit"
         "EVIDENCE_TAIL=$script:EvidenceTail"
         "CONTEXT_EVIDENCE_TAIL=$script:ContextEvidenceTail"
+        "BLOAT_TICKET_THRESHOLD=$script:BloatTicketThreshold"
     )
     Set-Content -LiteralPath $script:MetaFile -Value $body
 }
@@ -462,6 +470,7 @@ function Cmd-Init {
         $script:NextLimit = 20
         $script:EvidenceTail = 50
         $script:ContextEvidenceTail = 10
+        $script:BloatTicketThreshold = 50
         Save-Meta
     }
     if (-not (Test-Path -LiteralPath $script:CoreFile -PathType Leaf)) {
@@ -661,6 +670,7 @@ function Cmd-Render([string]$OutPath = "") {
     $ticketHint = Scoped-RelPath "tickets.tsv"
     $evidenceHint = Scoped-RelPath "evidence.tsv"
     $pulseHint = Scoped-RelPath "pulse.log"
+    $totalTickets = $tickets.Count
 
     $lines = [System.Collections.Generic.List[string]]::new()
     $lines.Add("# status.md")
@@ -669,6 +679,12 @@ function Cmd-Render([string]$OutPath = "") {
     $lines.Add("Scope: $script:Scope")
     $lines.Add("Last updated: $(Get-NowDate)")
     $lines.Add("> Generated from $(Scoped-RelPath 'tickets.tsv'), $(Scoped-RelPath 'criteria.tsv'), $(Scoped-RelPath 'evidence.tsv'), and $(Scoped-RelPath 'pulse.log'); do not hand-edit.")
+    $lines.Add("> Write policy: never edit status.md manually; use $(Get-RecommendedPmTicketCommand)")
+    $lines.Add("> Bloat metric: $totalTickets tickets (threshold: $script:BloatTicketThreshold)")
+    if ($script:BloatTicketThreshold -gt 0 -and $totalTickets -ge $script:BloatTicketThreshold) {
+        $lines.Add("> Threshold reached: use pm-ticket CLI for updates.")
+        $lines.Add("> Recommended command: $(Get-RecommendedPmTicketCommand)")
+    }
     $lines.Add("")
     $lines.Add("---")
     $lines.Add("")
