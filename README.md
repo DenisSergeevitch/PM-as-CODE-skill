@@ -44,7 +44,6 @@ Copy-paste prompt:
 ```md
 Before executing each task, invoke and follow `$pm-as-code`.
 Use it to read current status, choose/update task IDs, and record completion evidence.
-This is recommended, not mandatory: skip for tiny one-off actions that do not affect project state.
 ```
 
 ## Install Paths
